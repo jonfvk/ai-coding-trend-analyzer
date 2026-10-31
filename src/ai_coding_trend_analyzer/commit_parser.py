@@ -1,6 +1,7 @@
 import os
 import re
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
+from datetime import datetime
 
 AGENT_KEYWORDS = [
     r"copilot", r"tabnine", r"codewhisperer", r"ai[- ]?pair", r"ai[- ]?commit",
@@ -58,5 +59,29 @@ def find_agent_related_commits(commits: List[Commit]) -> List[Dict]:
             "date": commit.date,
             "message": commit.message,
             "agent_keyword_found": found
+        })
+    return result
+
+
+def extract_timestamps_and_agent_usage(commits: List[Commit]) -> List[Dict[str, Any]]:
+    """
+    For each commit, extract a dict with 'timestamp' (datetime or None) and 'agent_keyword_found' (bool).
+    If the commit date cannot be parsed, 'timestamp' is None.
+    """
+    result = []
+    for commit in commits:
+        # Try to parse date string to datetime
+        dt = None
+        date_str = commit.date
+        # Try several common git date formats
+        for fmt in ("%Y-%m-%d %H:%M:%S %z", "%Y-%m-%d %H:%M:%S", "%a %b %d %H:%M:%S %Y %z"):
+            try:
+                dt = datetime.strptime(date_str, fmt)
+                break
+            except Exception:
+                continue
+        result.append({
+            'timestamp': dt,
+            'agent_keyword_found': commit.has_agent_indicator()
         })
     return result
