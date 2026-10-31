@@ -36,7 +36,7 @@ class TestAggregation(unittest.TestCase):
         result = aggregate_commits_by_period(self.commit_data, period='week')
         # Check keys are week strings
         for key in result:
-            self.assertRegex(key, r'^2024-W\\d{2}$')
+            self.assertRegex(key, r'^2024-W\d{2}$')
         # Check counts
         total = sum(period['total'] for period in result.values())
         agent = sum(period['agent'] for period in result.values())
